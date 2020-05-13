@@ -8,8 +8,10 @@ blurayURL = ["https://www.blu-ray.com/movies/Bloodshot-Blu-ray/265952/", "https:
 for url in blurayURL:
     blurayObj = bluray.Bluray(url)
     blurayObj.build()
+    #blurayObj.printAttrs()
     
     imdbObj = imdb.IMDB()
     imdbObj.build(blurayObj.title, blurayObj.year, blurayObj.runtime)
+    imdbObj.printAttrs()
 
 

@@ -6,6 +6,9 @@ import helper
 tplBaseURL = "https://www.imdb.com/title/%s"
 tplSearchURL = "https://www.imdb.com/search/title/?title=%s&release_date=%s-01-01,%s-12-31"
 tplAkasBaseURl = "http://www.akas.imdb.com/title/%s"
+tplForeignBodyTitle = "%s (AKA: %s)"
+tplNonForeignBodyTitle = "%s"
+
 
 class IMDB(object):
 
@@ -15,23 +18,22 @@ class IMDB(object):
         self.movieURL = ""
         self.plotSummary = ""
         self.director = ""
-        self.threadTitle = ""
+        self.bodyTitle = ""
         self.foreignTitle = ""
         self.year = ""
         self.imdbCode = ""
+        self.usaTitle = ""
+        self.worldTitle = ""
         
     def build(self, blurayTitle, blurayYear, blurayRuntime):
         self.formatSearchURL(blurayTitle, blurayYear)
         self.scrapeIMDBLink(blurayRuntime)
-        self.scrapeTitle()
+        self.scrapePlotSummary()
         moviePageSoup = BeautifulSoup(requests.get(self.movieURL).text, 'html.parser')
         self.scrapeYear(moviePageSoup)
         self.scrapeDirector(moviePageSoup)
         self.scrapeForeignTitle(blurayTitle)
-
-
-        
-        self.printAttrs()
+        self.createBodyTitle()
 
     def formatSearchURL(self, title, year):
         startYear = int(year)-1
@@ -50,10 +52,10 @@ class IMDB(object):
                     self.imdbCode = imdbCode.attrs['data-tconst']
                     self.movieURL = tplBaseURL % (self.imdbCode)
 
-    def scrapeTitle(self):
+    def scrapePlotSummary(self):
         soup = BeautifulSoup(requests.get(self.movieURL+"/plotsummary").text, 'html.parser')
         plotSummarySoup = soup.find("ul", class_="ipl-zebra-list", id="plot-summaries-content")
-        self.title = plotSummarySoup.contents[1].contents[1].get_text().strip()
+        self.plotSummary = plotSummarySoup.contents[1].contents[1].get_text().strip()
 
     def scrapeYear(self, soup):
         self.year = soup.find("span", id="titleYear").get_text()[1:-1]
@@ -63,26 +65,44 @@ class IMDB(object):
         self.director = directorSoup.get_text().split("\n")[2].strip()
     
     def scrapeForeignTitle(self, blurayTitle):
-        soup = BeautifulSoup(requests.get(self.movieURL+"/releaseinfo").text, 'html.parser')
-        foreignTitleSoup = soup.find("table", class_="ipl-zebra-list akas-table-test-only")
-        newTest = foreignTitleSoup.findAll("tr", class_="ipl-zebra-list__item aka-item")
+        releaseInfoSoup = BeautifulSoup(requests.get(self.movieURL+"/releaseinfo").text, 'html.parser')
+        akaTableSoup = releaseInfoSoup.find("table", class_="ipl-zebra-list akas-table-test-only")
+        akaResults = akaTableSoup.findAll("tr", class_="ipl-zebra-list__item aka-item")
 
-        # for i in newTest:
-        #     if i.contents[1].text.strip() == "(original title)":
-        #         print(i.contents[1].text.strip())
-        #         print(i.contents[3].text.strip())
-        #     if i.contents[1].text.strip() == "USA":
-        #         print(i.contents[1].text.strip())
-        #         print(i.contents[3].text.strip())
+        for result in akaResults:
+            if result.contents[1].text.strip().lower() == "(original title)":
+                self.foreignTitle = result.contents[3].text.strip()
+            elif result.contents[1].text.strip().lower() == "usa":
+                self.usaTitle = result.contents[3].text.strip()
+            elif result.contents[1].text.strip().lower() == "world-wide (english title)":
+                self.worldTitle = result.contents[3].text.strip()
 
-    def findMatch(self, runtime):
-        return
-    
+    def createBodyTitle(self):
+        englishTitle = ""
+
+        if self.worldTitle != "":
+            englishTitle = self.worldTitle
+        else:
+            englishTitle = self.usaTitle
+
+
+        if self.foreignTitle == "" or self.foreignTitle == self.usaTitle or self.foreignTitle == self.worldTitle:
+            self.bodyTitle = tplNonForeignBodyTitle % (englishTitle)
+            return
+        else:
+            self.bodyTitle = tplForeignBodyTitle % (self.foreignTitle, englishTitle)
+        
+            
     def printAttrs(self):
         print(f"IMDB-URL: {self.movieURL}")
-        print(f"IMDB-TITLE: {self.title}")
+        print(f"IMDB-PLOT-SUMMARY: {self.plotSummary}")
         print(f"IMDB-YEAR: {self.year}")
         print(f"IMDB-DIRECTOR: {self.director}")
         print(f"IMDB-SEARCH-URL: {self.searchURL}")
+        print(f"IMDB-FOREIGN-TITLE: {self.foreignTitle}")
+        print(f"IMDB-USA-TITLE: {self.usaTitle}")
+        print(f"IMDB-WORLD-TITLE: {self.worldTitle}")
+        print(f"BODY-TITLE: {self.bodyTitle}")
+
 
         print()
