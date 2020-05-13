@@ -21,7 +21,7 @@ class Bluray(object):
         self.scrapeMovieDistributor(soup)
         self.scrapeYear(soup)
         self.scrapeRuntime(soup)
-        self.printAttrs()
+        #self.printAttrs()
 
     def scrapeTitle(self, soup):
         titleRaw = soup.find("div", id="movie_info")

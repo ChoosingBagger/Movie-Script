@@ -31,7 +31,7 @@ class IMDB(object):
 
 
         
-        ###self.printAttrs()
+        self.printAttrs()
 
     def formatSearchURL(self, title, year):
         startYear = int(year)-1
@@ -40,11 +40,15 @@ class IMDB(object):
 
     def scrapeIMDBLink(self, blurayRuntime):
         soup = BeautifulSoup(requests.get(self.searchURL).text, 'html.parser')
-        imdbCode = soup.find("div", class_="ribbonize")
-        imdbCode2 = soup.find_all("div", class_="lister-item mode-advanced")
-        print(imdbCode2)
-        #self.imdbCode = imdbCode.attrs['data-tconst']
-        #self.movieURL = tplBaseURL % (self.imdbCode)
+        searchResultList = soup.find_all("div", class_="lister-item mode-advanced")
+        for result in searchResultList:
+            runtimeList = result.find("span", class_="runtime")
+            if runtimeList != None:
+                runtime = int(result.find("span", class_="runtime").contents[0].strip().split(" ")[0].strip())
+                if(abs(runtime-blurayRuntime) <= 3):
+                    imdbCode = result.find("div", class_="ribbonize")
+                    self.imdbCode = imdbCode.attrs['data-tconst']
+                    self.movieURL = tplBaseURL % (self.imdbCode)
 
     def scrapeTitle(self):
         soup = BeautifulSoup(requests.get(self.movieURL+"/plotsummary").text, 'html.parser')
@@ -71,7 +75,8 @@ class IMDB(object):
         #         print(i.contents[1].text.strip())
         #         print(i.contents[3].text.strip())
 
-
+    def findMatch(self, runtime):
+        return
     
     def printAttrs(self):
         print(f"IMDB-URL: {self.movieURL}")
