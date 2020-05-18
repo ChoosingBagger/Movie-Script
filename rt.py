@@ -4,15 +4,18 @@ from requests import get
 class Tomato(object):
     def __init__(self):
         self.api_url = "https://www.rottentomatoes.com/api/private/v2.0/search"
-        self.rtSearh = ""
+        self.url = "https://www.rottentomatoes.com/m/"
+        self.rtSearch = ""
         self.prefix = ""
         self.count = ""
 
-    def build(self, term):
-        r = get(url=self.api_url, params={"q": term})
+    def build(self, term, year):
+        term_formatted = term.split()
+        term_formatted = "_".join(term_formatted)
+        self.movie_url = f"{self.url}{term_formatted}_{year}"
+        # print(self.movie_url)
+        r = get(url=self.api_url, params={"q": term_formatted})
         self.rtSearch = r.json()
-        self.scrapeCount()
-        self.scrapeURL()
 
     def scrapeCount(self):
         # if flag_in_future == "movie":
@@ -21,10 +24,11 @@ class Tomato(object):
         #     self.prefix = "tv"
         # Remove below before production
         self.prefix = "movie"
-        self.count = str(self.rtSearh[f"{self.prefix}Count"])
+        self.count = self.rtSearch[f"{self.prefix}Count"]
+        # print(self.count)
 
     def scrapeURL(self):
-        self.url = "https://www.rottentomatoes.com/"
+
         dicts = {}
         listTitle = []
         listURL = []
@@ -32,7 +36,7 @@ class Tomato(object):
             self.prefix = "movies"
         else:
             self.prefix = "tvSeries"
-        for items in self.rtSearh[self.prefix]:
+        for items in self.rtSearch[self.prefix]:
             listTitle.append(items["name"])
             tempURL = items["url"]
             listURL.append(f"{self.url}{tempURL}")
