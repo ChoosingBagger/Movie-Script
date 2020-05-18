@@ -1,6 +1,5 @@
 from requests import get
 import shutil
-import os
 
 
 class MovieDB(object):
@@ -9,9 +8,19 @@ class MovieDB(object):
         # Key taken from a special project that is amazing!
         self.api_url = "https://api.themoviedb.org/3/search/movie?api_key=b8eabaf5608b88d0298aa189dd90bf00"
         self.poster_url = "https://image.tmdb.org/t/p/original"
-
-    def build(self, title, year):
         self.definite = False
+        self.probable = False
+        self.maybe = False
+        self.title = ""
+        self.tmdbSearch = ""
+        self.tempURL = ""
+        self.tempPoster = ""
+        self.tempYear = ""
+        self.url = ""
+        self.poster = ""
+        self.year = ""
+
+    def build(self, title, year, folder):
         self.title = title[3]
         for entry in title:
             search_url = f"{self.api_url}&language=en-US&query={entry}&page=1&include_adult=false&year={year}"
@@ -19,7 +28,7 @@ class MovieDB(object):
             self.tmdbSearch = r.json()
             self.scrapeURL(entry, year)
             self.truthURL()
-        self.grabPoster(self.title)
+        self.grabPoster(self.title, folder)
 
     def scrapeURL(self, title, year):
         try:
@@ -60,12 +69,13 @@ class MovieDB(object):
 
     def truthLogic(self):
         self.url = self.tempURL
-        self.poster = self.tempPoster
+        self.poster = self.poster_url + self.tempPoster
         self.year = self.tempYear
 
-    def grabPoster(self, title):
+    def grabPoster(self, title, folder):
         resp = get(self.poster, stream=True)
-        fileName = title + '.jpg'
+        fileName = "poster.jpg"
+        fileName = folder / fileName
         localFile = open(fileName, 'wb')
 
         # Set decode_content value to True, otherwise the downloaded image file's size will be zero.
@@ -73,5 +83,4 @@ class MovieDB(object):
 
         # Copy the response stream raw data to local image file.
         shutil.copyfileobj(resp.raw, localFile)
-        fullPath = os.path.abspath(localFile)
-        self.posterPath = fullPath
+        self.posterPath = fileName
