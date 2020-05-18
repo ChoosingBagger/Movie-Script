@@ -4,6 +4,9 @@ from pathlib import Path
 
 class Folder(object):
 
+    def __init___(self):
+        self.outputDir = ""
+
     def build(self, dir, title):
         self.createMovieDir(dir, title)
 

@@ -1,3 +1,4 @@
+# Still WIP on this
 from requests import get
 
 
@@ -5,6 +6,7 @@ class Tomato(object):
     def __init__(self):
         self.api_url = "https://www.rottentomatoes.com/api/private/v2.0/search"
         self.url = "https://www.rottentomatoes.com/m/"
+        self.movie_url = ""
         self.rtSearch = ""
         self.prefix = ""
         self.count = ""

@@ -1,8 +1,12 @@
+# Still WIP on this
 from omdb import OMDBClient
 import json
 
 
 class OMDb(object):
+
+    def __init__(self):
+        self.imdbID = ""
 
     def build(self, title, year, apikey):
         client = OMDBClient(apikey=apikey)
@@ -14,4 +18,5 @@ class OMDb(object):
         self.result = json.loads(search.content)
 
     def parse(self, result):
-        print(result["imdbID"])
+        self.imdbID = result["imdbID"]
+        # print(result["imdbID"])
