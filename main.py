@@ -10,20 +10,20 @@ from omdb_api import OMDb
 import helper
 
 
-# blurayURL = ["https://www.blu-ray.com/movies/Bloodshot-Blu-ray/265952/", "https://www.blu-ray.com/movies/Vampire-Girl-vs-Frankenstein-Girl-Blu-ray/13951/", "https://www.blu-ray.com/movies/A-Star-Is-Born-Blu-ray/217109/", "https://www.blu-ray.com/movies/Better-Days-Blu-ray/261826/", "https://www.blu-ray.com/movies/Destry-Rides-Again-Blu-ray/131724/", "https://www.blu-ray.com/movies/Thieves-Blu-ray/263452/" ]
-blurayURL = ["https://www.blu-ray.com/movies/The-Lodge-Blu-ray/262879/"]
+blurayURL = ["https://www.blu-ray.com/movies/Bloodshot-Blu-ray/265952/", "https://www.blu-ray.com/movies/Vampire-Girl-vs-Frankenstein-Girl-Blu-ray/13951/", "https://www.blu-ray.com/movies/A-Star-Is-Born-Blu-ray/217109/", "https://www.blu-ray.com/movies/Better-Days-Blu-ray/261826/", "https://www.blu-ray.com/movies/Destry-Rides-Again-Blu-ray/131724/", "https://www.blu-ray.com/movies/Thieves-Blu-ray/263452/" ]
+# blurayURL = ["https://www.blu-ray.com/movies/The-Lodge-Blu-ray/262879/"]
 # blurayURL = ["https://www.blu-ray.com/movies/A-Star-Is-Born-Blu-ray/217109/"]
 config = ConfigParser()
 config.read("conf.txt")
 bdinfoPath = config["user_settings"]["bdinfo"]
 tempDir = config["user_settings"]["output_dir"]
 
-try:
-    omdbKey = config["user_settings"]["omdb"]
-    omKey = True
-except KeyError:
-    omKey = False
-    pass
+omKey = False
+# try:
+#     omdbKey = config["user_settings"]["omdb"]
+#     omKey = True
+# except KeyError:
+#     pass
 
 argsDict = getArgs()
 
@@ -45,7 +45,7 @@ for url in blurayURL:
 
     # tmdbObj = MovieDB()
     # titleDict = [imdbObj.worldTitle, imdbObj.foreignTitle, imdbObj.usaTitle, blurayObj.title]
-    # tmdbObj.build(titleDict, blurayObj.year)
+    # tmdbObj.build(titleDict, blurayObj.year, directory.outputDir)
 
     # rtObj = Tomato()
     # rtObj.build(blurayObj.title, tmdbObj.year)
