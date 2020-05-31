@@ -1,9 +1,9 @@
-import requests
 from requests import get
 from bs4 import BeautifulSoup
 
+
 class Bluray(object):
-    
+
     # intializes the bluray object, sets the blurayURL
     def __init__(self, movieURL):
         self.movieURL = movieURL
@@ -12,15 +12,18 @@ class Bluray(object):
         self.movieDistributor = ""
         self.year = ""
         self.runtime = 0
-
+        self.imdbLink = ""
+        self.rtLink = ""
 
     def build(self):
-        soup = BeautifulSoup(requests.get(self.movieURL).text, 'html.parser')
+        soup = BeautifulSoup(get(self.movieURL).text, 'html.parser')
         self.scrapeTitle(soup)
         self.scrapeCountry(soup)
         self.scrapeMovieDistributor(soup)
         self.scrapeYear(soup)
         self.scrapeRuntime(soup)
+        self.scrapeIMDBLink(soup)
+        self.scrapeRTLink(soup)
         #self.printAttrs()
 
     def scrapeTitle(self, soup):
@@ -29,7 +32,7 @@ class Bluray(object):
 
     def scrapeCountry(self, soup):
         countryRaw = soup.find("a", class_="black noline")
-        self.country = countryRaw.next_sibling.get('title').title()
+        self.country = countryRaw.next_sibling.get("title").title()
 
     def scrapeMovieDistributor(self, soup):
         movieInfoRaw = soup.find("span", class_="subheading grey")
@@ -43,12 +46,18 @@ class Bluray(object):
         movieInfoRaw = soup.find("span", class_="subheading grey")
         self.runtime = int(movieInfoRaw.get_text().split("|")[2].strip().split(" ")[0].strip())
 
+    def scrapeIMDBLink(self, soup):
+        self.imdbLink = soup.find("a", id="imdb_icon").attrs['href']
+
+    def scrapeRTLink(self, soup):
+        self.rtLink = soup.find("a", id="rt_icon").attrs['href']
+
     def printAttrs(self):
         print(f"BLURAY-TITLE: {self.title}")
         print(f"BLURAY-COUNTRY: {self.country}")
         print(f"BLURAY-DISTRIBUTOR: {self.movieDistributor}")
         print(f"BLURAY-YEAR: {self.year}")
         print(f"BLURAY-RUNTIME: {self.runtime}")
+        print(f"IMDB-LINK: {self.imdbLink}")
+        print(f"RT-LINK: {self.rtLink}")
         print()
-    
-
