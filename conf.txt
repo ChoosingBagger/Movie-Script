@@ -1,4 +1,3 @@
 [user_settings]
 bdinfo = C:\Path\To\BDInfo.exe
 output_dir = C:\Output\Path
-omdb = 000000000
