@@ -24,7 +24,6 @@ class Bluray(object):
         self.scrapeRuntime(soup)
         self.scrapeIMDBLink(soup)
         self.scrapeRTLink(soup)
-        #self.printAttrs()
 
     def scrapeTitle(self, soup):
         titleRaw = soup.find("div", id="movie_info")
