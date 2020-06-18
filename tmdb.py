@@ -6,73 +6,48 @@ class MovieDB(object):
 
     def __init__(self):
         # Key taken from a special project that is amazing!
-        self.api_url = "https://api.themoviedb.org/3/search/movie?api_key=b8eabaf5608b88d0298aa189dd90bf00"
-        self.poster_url = "https://image.tmdb.org/t/p/original"
-        self.definite = False
-        self.probable = False
-        self.maybe = False
+        self.api_url = ""
         self.title = ""
         self.tmdbSearch = ""
-        self.tempURL = ""
-        self.tempPoster = ""
-        self.tempYear = ""
+        self.tmdbResult = ""
         self.url = ""
         self.poster = ""
         self.year = ""
+        self.posterPath = ""
 
-    def build(self, title, year, folder):
-        self.title = title[3]
-        for entry in title:
-            search_url = f"{self.api_url}&language=en-US&query={entry}&page=1&include_adult=false&year={year}"
-            r = get(url=search_url)
-            self.tmdbSearch = r.json()
-            self.scrapeURL(entry, year)
-            self.truthURL()
-        self.grabPoster(self.title, folder)
+    def build(self, imdbID, folder):
+        imdbID = imdbID.split("/tt")
+        imdbID = "tt" + imdbID[1].replace("/", "")
+        self.api_url = f"https://api.themoviedb.org/3/find/{imdbID}?api_key=b8eabaf5608b88d0298aa189dd90bf00&language=en-US&external_source=imdb_id"
+        search_url = f"{self.api_url}&language=en-US&external_source=imdb_id"
+        r = get(url=search_url)
+        self.tmdbSearch = r.json()
+        self.scrapeLogic()
+        self.grabPoster(folder)
 
-    def scrapeURL(self, title, year):
+    def scrapeLogic(self):
         try:
-            for result in self.tmdbSearch["results"]:
-                if self.tmdbSearch["total_results"] == 1:
-                    self.scrapeLogic(result)
-                    self.definite = True
-
-                elif result["original_title"] == title:
-                    self.scrapeLogic(result)
-                    self.probable = True
-
-                elif result["title"] == title:
-                    self.scrapeLogic(result)
-                    self.maybe = True
+            self.tmdbResult = self.tmdbSearch["movie_results"][0]
+            self.title = self.tmdbResult["title"]
+            self.year = self.tmdbResult["release_date"].split("-", 1)[0][-4:]
         except KeyError:
-            pass
+            try:
+                self.tmdbResult = self.tmdbSearch["tv_results"][0]
+                self.title = self.tmdbResult["original_name"]
+                self.year = self.tmdbResult["first_air_date"].split("-", 1)[0][-4:]
+            except KeyError:
+                try:
+                    self.tmdbResult = self.tmdbSearch["tv_season_results"][0]
+                    self.title = self.tmdbResult["original_name"]
+                except KeyError:
+                    print("tmdb no worky")
+                    pass
+        self.tmdbID = self.tmdbResult["id"]
+        self.url = f"https://themoviedb.org/movie/{self.tmdbID}"
+        poster_path = self.tmdbResult["poster_path"]
+        self.poster = f"https://image.tmdb.org/t/p/original{poster_path}"
 
-    def scrapeLogic(self, result):
-        movie_id = result["id"]
-        self.tempURL = f"https://themoviedb.org/movie/{movie_id}"
-        self.tempPoster = result["poster_path"]
-        year = result["release_date"].split("-", 1)[0][-4:]
-        self.tempYear = year
-
-    def truthURL(self):
-        # Iterates through the scrapeURL logic, picks best one and assigns
-        # each as the truth of their respective pieces.
-        try:
-            if self.definite:
-                self.truthLogic()
-            elif self.probable and not self.definite:
-                self.truthLogic()
-            elif self.maybe and not self.definite and not self.probable:
-                self.truthLogic()
-        except AttributeError:
-            pass
-
-    def truthLogic(self):
-        self.url = self.tempURL
-        self.poster = self.poster_url + self.tempPoster
-        self.year = self.tempYear
-
-    def grabPoster(self, title, folder):
+    def grabPoster(self, folder):
         resp = get(self.poster, stream=True)
         fileName = "poster.jpg"
         fileName = folder / fileName
@@ -84,3 +59,10 @@ class MovieDB(object):
         # Copy the response stream raw data to local image file.
         shutil.copyfileobj(resp.raw, localFile)
         self.posterPath = fileName
+
+    def printAttrs(self):
+        print(f"TMDB-TITLE: {self.title}")
+        print(f"TMDB-POSTERURL: {self.poster}")
+        print(f"TMDB-POSTERPATH: {self.posterPath}")
+        print(f"TMDB-YEAR: {self.year}")
+        print()

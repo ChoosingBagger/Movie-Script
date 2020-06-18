@@ -3,8 +3,9 @@ import argparse
 
 def getArgs():
     parser = argparse.ArgumentParser()
-    # parser.add_argument('-b', dest='bd', action='store', type=str, required=True,
-    #                     help='Blu-ray link from blu-ray.com')
+    # add back to -b before 1.0 - required=True
+    parser.add_argument('-b', dest='bd', action='store', type=str, nargs='+',
+                        help='Blu-ray link from blu-ray.com')
     parser.add_argument('-i', dest='bdinfo', action='store', type=str,
                         help='BDInfoCLI-ng, add path to folder containing ISO or BDMV folder. Requires bdinfo.exe path in conf.txt')
     return parser.parse_args()
