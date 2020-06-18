@@ -9,19 +9,25 @@ from template import Template
 import helper
 
 
-blurayURL = [
-    "https://www.blu-ray.com/movies/Bloodshot-Blu-ray/265952/",
-    "https://www.blu-ray.com/movies/Vampire-Girl-vs-Frankenstein-Girl-Blu-ray/13951/",
-    "https://www.blu-ray.com/movies/A-Star-Is-Born-Blu-ray/217109/",
-    "https://www.blu-ray.com/movies/Better-Days-Blu-ray/261826/",
-    "https://www.blu-ray.com/movies/Destry-Rides-Again-Blu-ray/131724/",
-    "https://www.blu-ray.com/movies/Thieves-Blu-ray/263452/"
-    ]
+args = getArgs()
+if args.bd:
+    blurayURL = args.bd
+else:
+    blurayURL = [
+        "https://www.blu-ray.com/movies/Bloodshot-Blu-ray/265952/",
+        "https://www.blu-ray.com/movies/Vampire-Girl-vs-Frankenstein-Girl-Blu-ray/13951/",
+        "https://www.blu-ray.com/movies/A-Star-Is-Born-Blu-ray/217109/",
+        "https://www.blu-ray.com/movies/Better-Days-Blu-ray/261826/",
+        "https://www.blu-ray.com/movies/Destry-Rides-Again-Blu-ray/131724/",
+        "https://www.blu-ray.com/movies/Thieves-Blu-ray/263452/"
+        ]
+
+    blurayURL = ["https://www.blu-ray.com/movies/A-Star-Is-Born-Blu-ray/217109/"]
 config = ConfigParser()
 config.read("conf.txt")
 bdinfoPath = config["user_settings"]["bdinfo"]
 tempDir = config["user_settings"]["output_dir"]
-argsDict = getArgs()
+
 
 for url in blurayURL:
     blurayObj = Bluray(url)
@@ -36,18 +42,12 @@ for url in blurayURL:
     imdbObj.printAttrs()
 
     tmdbObj = MovieDB()
-    tmdbObj.build(blurayObj.imdbLink, directory.movieDir)
+    tmdbObj.build(blurayObj.imdbLink, directory.screenDir)
     tmdbObj.printAttrs()
 
-    if argsDict.bdinfo:
+    if args.bdinfo:
         bdiObj = BDInfo()
-        bdiObj.build(argsDict.bdinfo, directory.movieDir)
+        bdiObj.build(args.bdinfo, directory.movieDir)
         print(bdiObj.prettyBDInfo)
 
-    # templateObj = Template()
-    # templateObj.build(
-    #    imdbObj.worldTitle, imdbObj.director, aimgObj.poster, blurayObj.imdbLink,
-    #    tmdbObj.url, blurayObj.rtLink, blurayURL, imdbObj.plotSummary,
-    #    argsDict.file, blurayObj,movieDistributor, blurayObj.country,
-    #    imdbObj.year, imgObj.bbcode, imdbObj.bodyTitle
-    #    )
+    # templateObj = Template(url, blurayObj.title, blurayObj.year, etc.)
